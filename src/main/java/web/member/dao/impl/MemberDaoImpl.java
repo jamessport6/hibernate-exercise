@@ -1,9 +1,5 @@
 package web.member.dao.impl;
 
-import static core.util.CommonUtil.getConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 //import java.sql.ResultSet;
 //import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import web.member.dao.MemberDao;
-import web.member.pojo.Member;
+import web.member.entity.Member;
 
 public class MemberDaoImpl implements MemberDao {
 
@@ -63,8 +59,8 @@ public class MemberDaoImpl implements MemberDao {
 	@Override
 	public int update(Member member) {
 		final StringBuilder hql = new StringBuilder()
-			.append("UPDATE MEMBER SET ");
-		int offset = 0;
+			.append("UPDATE Member SET ");
+//		int offset = 0;
 		final String password = member.getPassword();
 		if (password != null && !password.isEmpty()) {
 			hql.append("password = :password,");
@@ -72,17 +68,17 @@ public class MemberDaoImpl implements MemberDao {
 		}
 		hql.append("nickname = :nickname,")
 			.append("pass = :pass,")
-			.append("roleId = :roleId,")
+			.append("role_id = :roleId,")
 			.append("updater = :updater,")
-			.append("lastUpdatedDate = NOW() ")
+			.append("last_updated_date = NOW() ")
 			.append("WHERE username = :username");
 		
 		Query<?> query = getSession().createQuery(hql.toString());
 		if (password != null &&!password.isEmpty()) {
-			query.setParameter("psaaworld", password);
+			query.setParameter("password", password);
 		}
 		
-		query
+		return query
 		.setParameter("nickname", member.getNickname())
 		.setParameter("pass", member.getPass())
 		.setParameter("roleId", member.getRoleId())
@@ -91,23 +87,23 @@ public class MemberDaoImpl implements MemberDao {
 		.executeUpdate();
 		
 		
-		try (
-			Connection conn = getConnection();
-			PreparedStatement pstmt = conn.prepareStatement(hql.toString())
-		) {
-			if (password != null && !password.isEmpty()) {
-				pstmt.setString(1, member.getPassword());
-			}
-			pstmt.setString(1 + offset, member.getNickname());
-			pstmt.setBoolean(2 + offset, member.getPass());
-			pstmt.setInt(3 + offset, member.getRoleId());
-			pstmt.setString(4 + offset, member.getUpdater());
-			pstmt.setString(5 + offset, member.getUsername());
-			return pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
+//		try (
+//			Connection conn = getConnection();
+//			PreparedStatement pstmt = conn.prepareStatement(hql.toString())
+//		) {
+//			if (password != null && !password.isEmpty()) {
+//				pstmt.setString(1, member.getPassword());
+//			}
+//			pstmt.setString(1 + offset, member.getNickname());
+//			pstmt.setBoolean(2 + offset, member.getPass());
+//			pstmt.setInt(3 + offset, member.getRoleId());
+//			pstmt.setString(4 + offset, member.getUpdater());
+//			pstmt.setString(5 + offset, member.getUsername());
+//			return pstmt.executeUpdate();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return -1;
 	}
 
 	@Override
@@ -223,7 +219,7 @@ public class MemberDaoImpl implements MemberDao {
 	@Override
 	public Member selectForLogin(String username, String password) {
 //		final String sql = "select * from MEMBER where USERNAME = ? and PASSWORD = ?";
-		final String sql = "select * from MEMBER where USERNAME = :username and PASSWORD = :psaaword";
+		final String sql = "select * from MEMBER where USERNAME = :username and PASSWORD = :password";
 		
 		return getSession()
 				.createNativeQuery(sql, Member.class)
